@@ -1,40 +1,43 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <malloc.h>
-
-#include <opencv2/opencv.hpp>   
-#include <opencv2/core/core.hpp>   
-#include <opencv2/highgui/highgui.hpp>  
-
-#define PI 3.14159265359
+#include "opencv2/opencv.hpp"
 
 using namespace cv;
 using namespace std;
-int main_test(){ 
-	VideoCapture cap(0); // open the default camera 
-	if (!cap.isOpened())  // check if we succeeded  
+int main_HoughLine()
+{
+	VideoCapture cap(0); // open the default camera
+	if (!cap.isOpened())  // check if we succeeded
 		return -1;
-	Mat edges; 
-	namedWindow("edges", 1); 
-	for (;;) {  
+
+	Mat dst;
+	namedWindow("edges", 1);
+	for (;;)
+	{
 		Mat src;
-		cap >> src; // get a new frame from camera  
-		cvtColor(src, dst, COLOR_BGR2GRAY);  
+		cap >> src; // get a new frame from camera
+		cvtColor(src, dst, COLOR_BGR2GRAY);
 		GaussianBlur(dst, dst, Size(7, 7), 1.5, 1.5);
-		Canny(dst, dst, 0, 30, 3);
-							
-		vector<Vec4i> lines; 
-		lines.reverse(1000);
-		HoughLinesP(edges, lines, 1, CV_PI / 180, 100, 100, 10);
-		Mat Blank(frame.rows, frame.cols, CV_8UC3, Scalar(0, 0, 0));  
-		for (size_t i = 0; i < lines.size(); i++) {   
-			Vec4i l = lines[i];  
-			line(frame, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 0), 2, CV_AA);   
-			line(Blank, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255, 255, 255), 2, CV_AA); 
-		} 
-		imshow("edges", Blank);
-		if (waitKey(30) >= 0) break; 
-	} // the camera will be deinitialized automatically in VideoCapture destructor
+		Canny(dst, dst, 30, 100, 3);
+		imshow("canny", dst);
+
+		vector<Vec4i> lines;
+		lines.reserve(1000);
+
+		HoughLinesP(dst, lines, 1, CV_PI / 180, 10, 30, 10);
+
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			Vec4i l = lines[i];
+			Point p1, p2;
+			p1 = Point(l[0], l[1]);
+			p2 = Point(l[2], l[3]);
+
+			line(src, p1, p2, Scalar(0, 0, 255), 2);
+		}
+
+		imshow("Hough_cdst", src);
+
+		if (waitKey(30) >= 0) break;
+	}
+	// the camera will be deinitialized automatically in VideoCapture destructor
 	return 0;
 }
