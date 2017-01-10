@@ -34,7 +34,7 @@ int main_HoughLine()
 			line(src, p1, p2, Scalar(0, 0, 255), 2);
 		}
 
-		imshow("Hough_cdst", src);
+		imshow("result", src);
 
 		if (waitKey(30) >= 0) break;
 	}
