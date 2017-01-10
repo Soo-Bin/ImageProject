@@ -18,15 +18,14 @@ int main_test(){ 
 	Mat edges; 
 	namedWindow("edges", 1); 
 	for (;;) {  
-		Mat frame;
-		cap >> frame; // get a new frame from camera  
-		cvtColor(frame, edges, COLOR_BGR2GRAY);  
-		GaussianBlur(edges, edges, Size(7, 7), 1.5, 1.5);
-		Canny(edges, edges, 0, 30, 3);
-		Mat dx, dy;
-		Sobel(edges, dx, CV_32F, 1, 0);
-		Sobel(edges, dy, CV_32F, 0, 1);  
+		Mat src;
+		cap >> src; // get a new frame from camera  
+		cvtColor(src, dst, COLOR_BGR2GRAY);  
+		GaussianBlur(dst, dst, Size(7, 7), 1.5, 1.5);
+		Canny(dst, dst, 0, 30, 3);
+							
 		vector<Vec4i> lines; 
+		lines.reverse(1000);
 		HoughLinesP(edges, lines, 1, CV_PI / 180, 100, 100, 10);
 		Mat Blank(frame.rows, frame.cols, CV_8UC3, Scalar(0, 0, 0));  
 		for (size_t i = 0; i < lines.size(); i++) {   
