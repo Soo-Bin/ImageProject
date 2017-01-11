@@ -10,11 +10,7 @@
 using namespace cv;
 
 int** IntAlloc2(int width, int height);
-void IntFree2(int** image, int width, int height);
-int** ReadImage(char* name, int* width, int* height);
-void WriteImage(char* name, int** image, int width, int height);
 void ImageShow(char* winname, int** image, int width, int height);
-void CopyImage(int** src, int width, int height, int** dst);
 
 void ConvertMat2Image(Mat& img_mat, int** image_out)
 {
