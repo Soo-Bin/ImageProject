@@ -19,11 +19,6 @@ void WriteImage(char* name, int** image, int width, int height);
 void ImageShow(char* winname, int** image, int width, int height);
 void CopyImage(int** src, int width, int height, int** dst);
 
-const Vec3f pWorld[6] = {
-	{ 0.832343,  0.022582,  -0.018577 },
-	{ 1.6878, 0.017131,  -0.022032 }
-};
-
 void computePixelCoordinates(int width, int height)
 {
 	int result;
@@ -41,26 +36,6 @@ void computePixelCoordinates(int width, int height)
 	}
 }
 
-/*
-void main_interpolation()
-{
-	int width, height;
-	int** image = ReadImage("Hydrangeas.jpg", &width, &height);
-	int** image_out = (int**)IntAlloc2(width*SIZE, height*SIZE);// image_out[height][width]
-
-	Interpolation(image, width, height, image_out);
-
-	WriteImage("image_out.jpg", image_out, width*SIZE, height*SIZE);
-
-	ImageShow("input window", image, width, height);
-	ImageShow("output window", image_out, width*SIZE, height*SIZE);
-	waitKey(0);
-
-	IntFree2(image, width, height);
-	IntFree2(image_out, width*SIZE, height*SIZE);
-
-}
-*/
 void main_pinhole() 
 {
 	int image_plane_x = 1024, image_plane_y = 512;
