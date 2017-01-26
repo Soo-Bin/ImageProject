@@ -12,6 +12,7 @@ void main_AvgFiltering();
 void main_interpolation();
 void main_rotaion();
 int main_LifeCam();
+void main_pinhole();
 
 void main()
 {
@@ -20,5 +21,6 @@ void main()
 	main_interpolation();
 	main_rotaion();
 	main_LifeCam();
-}
+    main_pinhole();
 
+}
