@@ -124,8 +124,8 @@ void pin_draw(const vector<Point3d>& w_pts1, vector<Point2d>& i_pts2, vector<dou
 		}
 
 		// normalized image coordinate
-		u = -Xc / Zc;
-		v = -Yc / Zc;
+		u = Xc / Zc;
+		v = Yc / Zc;
 
 		// distorted normalized image coordinate
 		r2 = u*u + v*v;
@@ -138,8 +138,10 @@ void pin_draw(const vector<Point3d>& w_pts1, vector<Point2d>& i_pts2, vector<dou
 
 		i_pts2.push_back(Point2d(x, y));
 		depth.push_back(Zc);
+
+		printf("3D: %f %f %f \t 2D: %f %f \n", Xc, Yc, Zc, x, y);
 	}
-	printf("3D: %f %f %f \t 2D: %f %f \n", Xc, Yc, Zc, u, v);
+	
 
 }
 
@@ -156,23 +158,46 @@ void main_pinhole()
 
 	//coordinate
 	vector<Point3d> worldPoint = { { 1.3, 1.3, 0.8 },
-									{ 1.8, 1.3, 0.8 },
-									{ 1.8, 1.8, 0.8 },
-									{ 1.3, 1.8, 0.8 }
-	};
+									{ 1.2, 1.3, 0.8 } ,
+									{ 1.1, 1.3, 0.8 } };
 	vector<Point2d> imagePoint;
 	vector<double> depth = { 3.0 };
-	//Mat image = imread("Hydrangeas.jpg", 1);
-	//Mat image_out;
-	//cvtColor(image, image, CV_GRAY2RGB);
 
+	Mat src = imread("Hydrangeas.jpg", 0);
+	Mat dst, warp_dst;
+	Point2f srcTri[3], dstTri[3];
+	Mat warp_mat = Mat(2, 3, CV_32FC1);
+	/// Set the dst image the same type and size as src
+	warp_dst = Mat::zeros(src.rows, src.cols, src.type());
+
+	/// Set your 3 points to calculate the  Affine Transform
+	srcTri[0] = Point2f(0, 0);
+	srcTri[1] = Point2f(src.cols - 1, 0);
+	srcTri[2] = Point2f(0, src.rows - 1);
+	/*
+	dstTri[0] = Point2f(src.cols*0.0, src.rows*0.33);
+	dstTri[1] = Point2f(src.cols*0.85, src.rows*0.25);
+	dstTri[2] = Point2f(src.cols*0.15, src.rows*0.7);
+
+	printf("dstTri[0]: %f %f %f \n", dstTri[0].x, dstTri[1].x, dstTri[2].x);
+	*/
+	
 	cam_setting(cp_x, cp_x, cp_z, pan_deg, tilt_deg);
 	cam_parameter(fx, fy, cx, cy, k1, k2, p1, p2);
-	set_img(img_w, img_h);
+	//set_img(img_w, img_h);
 	pin_draw(worldPoint, imagePoint, depth);
 
-	//imshow("input window", image);
-	//imshow("output window", image_out);
-	//waitKey(0);
+	dstTri[0] = Point2f(imagePoint.begin()->x, imagePoint.begin()->y);
+	dstTri[1] = Point2f((imagePoint.begin() + 1)->x, (imagePoint.begin() + 1)->y);
+	dstTri[2] = Point2f((imagePoint.begin() + 2)->x, (imagePoint.begin() + 2)->y);
+
+	/// Get the Affine Transform
+	warp_mat = getAffineTransform(srcTri, dstTri);
+	/// Apply the Affine Transform just found to the src image
+	warpAffine(src, warp_dst, warp_mat, warp_dst.size());
+
+	imshow("input window", src);
+	imshow("output window", warp_dst);
+	waitKey(0);
 
 }
