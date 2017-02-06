@@ -10,7 +10,8 @@
 
 using namespace cv;
 
-#define FOCAL 1.9
+#define FOCAL 0.5
+#define Z 1
 
 int** IntAlloc2(int width, int height)
 {
@@ -92,23 +93,25 @@ void CopyImage3(int** image, int height, int width, int*** img)
 {
 	for (int y = 0; y < height; y++)
 		for (int x = 0; x < width; x++)
-			img[1][y][x] = image[y][x];
+			img[Z][y][x] = image[y][x];
 }
 
-void Bilinear_Interp(int*** world, int height, int width, int** image_out)
+void pinhole_Translate(int*** world, int height, int width, int** image_out)
 {
+	double ratio = FOCAL / (double)Z;
+
 	for (int y = 0; y < height; y++) 
 		for (int x = 0; x < width; x++)
 		{
-			int px = (int)(-x / FOCAL) + 700;
-			int py = (int)(-y / FOCAL) + 600;
+			int px = (int)(-x / ratio) + 700;
+			int py = (int)(-y / ratio) + 600;
 
-			int _Px = (int)(x / FOCAL);
-			int _Py = (int)(y / FOCAL);
+			int _Px = (int)(x / ratio);
+			int _Py = (int)(y / ratio);
 
-			double fx1 = (double)x / (double)FOCAL - _Px;
+			double fx1 = (double)x / (double)ratio - _Px;
 			double fx2 = (1 - fx1);
-			double fy1 = (double)y / (double)FOCAL - _Py;
+			double fy1 = (double)y / (double)ratio - _Py;
 			double fy2 = (1 - fy1);
 
 			double w1 = (fx2 * fy2);
@@ -119,10 +122,10 @@ void Bilinear_Interp(int*** world, int height, int width, int** image_out)
 			uchar P1, P2, P3, P4;
 						
 			if (px > 0 && px < width - 2 && py < height - 2 && py > 0) {
-				P1 = world[1][py][px];
-				P2 = world[1][py][px + 1];
-				P3 = world[1][py + 1][px];
-				P4 = world[1][py + 1][px + 1];
+				P1 = world[Z][py][px];
+				P2 = world[Z][py][px + 1];
+				P3 = world[Z][py + 1][px];
+				P4 = world[Z][py + 1][px + 1];
 			}
 			else {
 				P1 = 0;	P2 = 0;	P3 = 0;	P4 = 0;
@@ -134,7 +137,6 @@ void Bilinear_Interp(int*** world, int height, int width, int** image_out)
 				image_out[y][x] = (w1*P1 + w2*P2 + w3*P3 + w4*P4);
 
 			if (image_out[y][x] > 255) image_out[y][x] = 255;
-			if (image_out[y][x] < 0) image_out[y][x] = 0;
 		}
 }
 
@@ -144,10 +146,10 @@ void main()
 	int width, height;
 	int** image = ReadImage("Hydrangeas.jpg", &width, &height); //height=1024, width = 768
 	int** image_out = (int**)IntAlloc2(width, height);// image_out[height][width]
-	int*** img = (int***)IntAlloc3(width, height, 1);
+	int*** img = (int***)IntAlloc3(width, height, Z);
 
 	CopyImage3(image, height, width, img);
-	Bilinear_Interp(img, height, width, image_out);
+	pinhole_Translate(img, height, width, image_out);
 
 	WriteImage("image_out.jpg", image_out, width, height);
 
@@ -157,5 +159,5 @@ void main()
 
 	IntFree2(image, width, height);
 	IntFree2(image_out, width, height);
-	IntFree3(img, width, height,1);
+	IntFree3(img, width, height, Z);
 }
